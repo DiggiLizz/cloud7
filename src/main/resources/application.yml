@@ -23,11 +23,13 @@ spring:
   cloud:
     aws:
       region:
-        static: us-east-1     # Región del bucket
-      # Si usas LocalStack, descomenta:
-      # endpoint: http://localhost:8080
+        static: us-east-1    
 
 # Tu bucket (propiedad propia de la app)
 app:
   s3:
     bucket: cloudsem2
+
+# para activar el efs
+efs:
+  path: /app/efs

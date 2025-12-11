@@ -5,7 +5,7 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <!-- 🔹 Herencia de Spring Boot -->
+  <!-- Herencia de Spring Boot -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -13,14 +13,14 @@
     <relativePath/>
   </parent>
 
-  <!-- 🔹 Identificación del proyecto -->
+  <!--identificación del proyecto -->
   <groupId>com.duoc.ejemplo</groupId>
   <artifactId>microservicio</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>microservicio</name>
   <description>Microservicio ejemplo (eventos/ventas con AWS S3)</description>
 
-  <!-- ✅ PROPIEDADES -->
+  <!-- PROPIEDADES -->
   <properties>
     <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +28,7 @@
     <spring-cloud-aws.version>3.2.0</spring-cloud-aws.version>
   </properties>
 
-  <!-- ✅ BOM de Spring Cloud AWS (maneja versiones automáticamente) -->
+  <!-- BOM de Spring Cloud AWS (maneja versiones automáticamente) -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -41,7 +41,7 @@
     </dependencies>
   </dependencyManagement>
 
-  <!-- ✅ DEPENDENCIAS -->
+  <!-- DEPENDENCIAS -->
   <dependencies>
     <!-- Web -->
     <dependency>
@@ -97,7 +97,7 @@
     </dependency>
   </dependencies>
 
-  <!-- ✅ CONFIGURACIÓN DE BUILD -->
+  <!-- CONFIGURACIÓN DE BUILD -->
   <build>
     <resources>
       <resource>

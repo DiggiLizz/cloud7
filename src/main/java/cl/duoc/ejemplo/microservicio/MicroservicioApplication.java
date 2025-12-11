@@ -9,5 +9,4 @@ public class MicroservicioApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MicroservicioApplication.class, args);
 	}
-
 }
