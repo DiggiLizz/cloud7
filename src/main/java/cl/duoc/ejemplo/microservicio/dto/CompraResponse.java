@@ -15,8 +15,8 @@ public class CompraResponse {
     private LocalDateTime fechaCompra;
 
     public CompraResponse(Long compraId, Long eventoId, String nombreEvento, LocalDate fechaEvento,
-                          Integer cantidad, BigDecimal precioUnitario, BigDecimal precioTotal,
-                          LocalDateTime fechaCompra) {
+                            Integer cantidad, BigDecimal precioUnitario, BigDecimal precioTotal,
+                            LocalDateTime fechaCompra) {
         this.compraId = compraId;
         this.eventoId = eventoId;
         this.nombreEvento = nombreEvento;

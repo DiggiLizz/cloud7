@@ -19,7 +19,7 @@ public class AwsS3Service {
 
     private final S3Client s3Client;
 
-    /** 📋 READ: Listar objetos */
+    //Listar objetos
     public List<ListS3ObjectDto> listObjects(String bucket) {
         ListObjectsV2Request request = ListObjectsV2Request.builder()
                 .bucket(bucket)
@@ -30,7 +30,7 @@ public class AwsS3Service {
                 .collect(Collectors.toList());
     }
 
-    /** ⬇️ READ: Descargar archivo */
+    //Descargar archivo
     public byte[] downloadAsBytes(String bucket, String key) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
                 .bucket(bucket)
@@ -43,7 +43,7 @@ public class AwsS3Service {
         }
     }
 
-    /** ⬆️ CREATE/UPDATE: Subir o sobrescribir */
+    //Subir o sobrescribir
     public String upload(String bucket, String key, MultipartFile file) throws IOException {
         String objectKey = (key != null && !key.isBlank()) ? key : file.getOriginalFilename();
         PutObjectRequest putReq = PutObjectRequest.builder()
@@ -56,7 +56,7 @@ public class AwsS3Service {
         return objectKey;
     }
 
-    /** 🔁 MOVE: Copiar y eliminar el original */
+    //mover objeto
     public void moveObject(String bucket, String sourceKey, String destKey) {
         CopyObjectRequest copyReq = CopyObjectRequest.builder()
                 .sourceBucket(bucket)
@@ -69,7 +69,7 @@ public class AwsS3Service {
         deleteObject(bucket, sourceKey);
     }
 
-    /** ❌ DELETE: Eliminar objeto */
+    //Eliminar objeto
     public void deleteObject(String bucket, String key) {
         DeleteObjectRequest delReq = DeleteObjectRequest.builder()
                 .bucket(bucket)

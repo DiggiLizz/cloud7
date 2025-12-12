@@ -7,6 +7,13 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+  
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,7 +30,7 @@ spring:
   cloud:
     aws:
       region:
-        static: us-east-1    
+        static: us-east-1
 
 # Tu bucket (propiedad propia de la app)
 app:

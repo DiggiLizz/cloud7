@@ -32,8 +32,8 @@ public class Compra {
 
     public Compra() {}
 
-    public Compra(Evento evento, Integer cantidad, BigDecimal precioUnitario,
-                  BigDecimal precioTotal, LocalDateTime fechaCompra) {
+    // Contructor
+    public Compra(Evento evento, Integer cantidad, BigDecimal precioUnitario, BigDecimal precioTotal, LocalDateTime fechaCompra) {
         this.evento = evento;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
@@ -41,17 +41,43 @@ public class Compra {
         this.fechaCompra = fechaCompra;
     }
 
-    public Long getId() { return id; }
-    public Evento getEvento() { return evento; }
-    public Integer getCantidad() { return cantidad; }
-    public BigDecimal getPrecioUnitario() { return precioUnitario; }
-    public BigDecimal getPrecioTotal() { return precioTotal; }
-    public LocalDateTime getFechaCompra() { return fechaCompra; }
+    // Getters y Setters
+    public Long getId() {
+        return id;
+    }
 
-    public void setId(Long id) { this.id = id; }
-    public void setEvento(Evento evento) { this.evento = evento; }
-    public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
-    public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
-    public void setPrecioTotal(BigDecimal precioTotal) { this.precioTotal = precioTotal; }
-    public void setFechaCompra(LocalDateTime fechaCompra) { this.fechaCompra = fechaCompra; }
+    public Evento getEvento() {
+        return evento;
+    }
+    public Integer getCantidad() {
+        return cantidad;
+    }
+    public BigDecimal getPrecioUnitario() {
+        return precioUnitario;
+    }
+    public BigDecimal getPrecioTotal() {
+        return precioTotal;
+    }
+    public LocalDateTime getFechaCompra() {
+        return fechaCompra;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public void setEvento(Evento evento) {
+        this.evento = evento;
+    }
+    public void setCantidad(Integer cantidad) {
+        this.cantidad = cantidad;
+    }
+    public void setPrecioUnitario(BigDecimal precioUnitario) {
+        this.precioUnitario = precioUnitario;
+    }
+    public void setPrecioTotal(BigDecimal precioTotal) {
+        this.precioTotal = precioTotal;
+    }
+    public void setFechaCompra(LocalDateTime fechaCompra) {
+        this.fechaCompra = fechaCompra;
+    }
 }

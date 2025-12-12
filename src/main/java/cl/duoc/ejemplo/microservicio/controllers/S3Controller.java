@@ -30,7 +30,7 @@ public class S3Controller {
     /** Descargar archivo como byte[] */
     @GetMapping("/{bucket}/object")
     public ResponseEntity<byte[]> downloadObject(@PathVariable String bucket,
-                                                 @RequestParam String key) {
+                                                @RequestParam String key) {
         byte[] fileBytes = awsS3Service.downloadAsBytes(bucket, key);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + key)
@@ -41,8 +41,8 @@ public class S3Controller {
     /** Subir archivo (guarda en EFS/NFS y luego en S3) */
     @PostMapping(path = "/{bucket}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadObject(@PathVariable String bucket,
-                                               @RequestParam(required = false) String key,
-                                               @RequestParam("file") MultipartFile file) {
+                                                @RequestParam(required = false) String key,
+                                                @RequestParam("file") MultipartFile file) {
         try {
             String filename = (key == null || key.isBlank()) ? file.getOriginalFilename() : key;
 
@@ -60,8 +60,8 @@ public class S3Controller {
     /**  Alias: subir archivo con la ruta /object (mismo manejo de errores) */
     @PostMapping(path = "/{bucket}/object", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadAlias(@PathVariable String bucket,
-                                              @RequestParam("file") MultipartFile file,
-                                              @RequestParam(required = false) String key) {
+                                                @RequestParam("file") MultipartFile file,
+                                                @RequestParam(required = false) String key) {
         try {
             String filename = (key == null || key.isBlank()) ? file.getOriginalFilename() : key;
 
@@ -79,8 +79,8 @@ public class S3Controller {
     /** Mover objeto dentro del bucket */
     @PostMapping("/{bucket}/move")
     public ResponseEntity<Void> moveObject(@PathVariable String bucket,
-                                           @RequestParam String sourceKey,
-                                           @RequestParam String destKey) {
+                                            @RequestParam String sourceKey,
+                                            @RequestParam String destKey) {
         awsS3Service.moveObject(bucket, sourceKey, destKey);
         return ResponseEntity.ok().build();
     }
@@ -88,7 +88,7 @@ public class S3Controller {
     /** Eliminar objeto */
     @DeleteMapping("/{bucket}/object")
     public ResponseEntity<Void> deleteObject(@PathVariable String bucket,
-                                             @RequestParam String key) {
+                                            @RequestParam String key) {
         awsS3Service.deleteObject(bucket, key);
         return ResponseEntity.ok().build();
     }
