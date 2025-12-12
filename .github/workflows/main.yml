@@ -1,160 +1,64 @@
-name: Build, Push and Deploy Docker Image
+name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
-
-env:
-  AWS_REGION: us-east-1
-  S3_BUCKET: cloudsem2
-  APP_NAME: my-app
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
-
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # ==============================
-      #  Paso 1: Checkout del código
-      # ==============================
+
+      # Paso 1: Checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # =========================================
-      #  (Opcional) Build backend / frontend aquí
-      # =========================================
-      # - name: Build proyecto
-      #   run: |
-      #     ./mvnw -q -DskipTests package
-      #     # ó npm ci && npm run build (si corresponde)
-
-      # =====================================
       # Paso 2: Autenticar en DockerHub
-      # =====================================
       - name: Log in to DockerHub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # =====================================
-      # 🏗️ Paso 3: Construir la imagen Docker
-      # =====================================
+      # Paso 3: Construir la imagen de Docker
       - name: Build Docker Image
         run: |
-          echo "🔨 Construyendo imagen Docker..."
-          docker build -t "${DOCKER_IMAGE}" .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest .
 
-      # ======================================
-      # 🚀 Paso 4: Subir la imagen a DockerHub
-      # ======================================
+      # Paso 4: Hacer push de la imagen a DockerHub
       - name: Push Docker Image
         run: |
-          echo "📦 Subiendo imagen a DockerHub..."
-          docker push "${DOCKER_IMAGE}"
-
-      # ==========================================================
-      # 🌎 Paso 5: Configurar credenciales de AWS para usar S3/EC2
-      # ==========================================================
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+          
+      # Paso 5: Configurar credenciales de AWS para SSH, incluyendo AWS_SESSION_TOKEN
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      # ===================================================================
-      # 📤 Paso 6: Publicar estáticos al bucket S3 (si existe ./dist o ./build)
-      # ===================================================================
-      - name: Sync static assets to S3
-        run: |
-          echo "🔎 Buscando carpeta de estáticos..."
-          if [ -d "./dist" ]; then
-            echo "📤 Subiendo ./dist a s3://${S3_BUCKET}/web/ ..."
-            aws s3 sync ./dist "s3://${S3_BUCKET}/web/" --delete
-          elif [ -d "./build" ]; then
-            echo "📤 Subiendo ./build a s3://${S3_BUCKET}/web/ ..."
-            aws s3 sync ./build "s3://${S3_BUCKET}/web/" --delete
-          else
-            echo "ℹ️ No se encontró carpeta ./dist ni ./build. Se omite la sincronización de estáticos."
-          fi
-
-      # ========================================================================
-      # 🗂️ Paso 7: Respaldar artefactos del build en S3 para trazabilidad (tgz)
-      # ========================================================================
-      - name: Package build artifacts
-        run: |
-          mkdir -p artifacts
-          # Ejemplos (ajuste según su proyecto)
-          [ -d target ] && cp -r target artifacts/ || true
-          [ -f Dockerfile ] && cp Dockerfile artifacts/ || true
-          [ -f .env ] && cp .env artifacts/ || true
-          tar -czf "build-${{ github.sha }}.tgz" artifacts
-      - name: Upload build bundle to S3
-        run: |
-          echo "🧾 Subiendo bundle a S3..."
-          aws s3 cp "build-${{ github.sha }}.tgz" "s3://${S3_BUCKET}/builds/build-${{ github.sha }}.tgz"
-
-      # =======================================
-      # 🔑 Paso 8: Configurar llave SSH de EC2
-      # =======================================
+          aws-region: us-east-1  # Cambia a tu región
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}  # Añadido aquí
+      # Paso 5.5:
       - name: Add SSH Key
         run: |
-          echo "🔑 Configurando clave SSH..."
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-            # =======================================
-      # 🖥️ Paso 9: Desplegar en la instancia EC2 (FIX S3_BUCKET)
-      # =======================================
-      - name: SSH commands to deploy on EC2
-        shell: bash
-        env:
-          S3_BUCKET: ${{ env.S3_BUCKET }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Paso 6: Conectarse a EC2 y desplegar el contenedor
+      - name: SSH commands to deploy
         run: |
-          echo "Conectando a EC2 y desplegando..."
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-            ${{ secrets.USER_SERVER }}@${{ secrets.EC2_HOST }} \
-            "S3_BUCKET=${S3_BUCKET} AWS_REGION=${AWS_REGION} DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME} DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN} bash -s" << 'EOF'
-            set -euo pipefail
-
-            echo "📦 Verificando AWS CLI en EC2..."
-            if ! command -v aws >/dev/null 2>&1; then
-              echo "➡️ Instalando AWS CLI (Amazon Linux/RHEL-based)..."
-              sudo yum -y install awscli || true
-            fi
-
-            echo "🧹 Deteniendo contenedores antiguos..."
-            docker stop my-app || true
-            docker rm my-app || true
-
-            echo "Iniciando sesión en DockerHub..."
-            echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
-
-            echo "⬇Descargando imagen más reciente..."
-            docker pull "${DOCKERHUB_USERNAME}/my-app:latest"
-
-            echo "(Opcional) Descargando configuración desde S3 si existe..."
-            mkdir -p /home/${USER}/deploy
-            aws s3 cp "s3://${S3_BUCKET}/config/.env" "/home/${USER}/deploy/.env" || true
-
-            echo "Iniciando nuevo contenedor..."
-            if [ -f "/home/${USER}/deploy/.env" ]; then
-              docker run -d --name my-app --env-file /home/${USER}/deploy/.env -p 8080:8080 --restart unless-stopped "${DOCKERHUB_USERNAME}/my-app:latest"
-            else
-              docker run -d --name my-app -p 8080:8080 --restart unless-stopped "${DOCKERHUB_USERNAME}/my-app:latest"
-            fi
-
-            echo "Limpiando imágenes antiguas..."
-            docker image prune -f
-
-            echo "Despliegue finalizado."
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.USER_SERVER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Autenticar en DockerHub desde EC2
+            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            # Descargar la última versión de la imagen
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
+            # Parar y eliminar cualquier contenedor previo
+            docker stop my-app || true && docker rm my-app || true
+            # Iniciar el contenedor
+            docker run -d --name my-app -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/my-app:latest
           EOF
