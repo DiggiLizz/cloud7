@@ -1,6 +1,6 @@
 package cl.duoc.ejemplo.microservicio.controllers;
 
-import cl.duoc.ejemplo.microservicio.dto.CompraResponse;
+import cl.duoc.ejemplo.microservicio.dto.ResumenCompraRequest;
 import cl.duoc.ejemplo.microservicio.service.ResumenCompraService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -29,19 +29,17 @@ public class ResumenCompraController {
 
     private final ResumenCompraService resumenCompraService;
 
-    @PostMapping
-    public ResponseEntity<String> generarResumen(@RequestBody CompraResponse compra) throws IOException {
-
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> generarResumen(@RequestBody ResumenCompraRequest compra) {
         resumenCompraService.generarYSubirResumen(compra);
 
         String mensaje = "Resumen de compra generado y almacenado en S3 para la compra ID: " + compra.getCompraId();
         return ResponseEntity.status(HttpStatus.CREATED).body(mensaje);
     }
 
-    @GetMapping("/{compraId}")
+    @GetMapping(value = "/{compraId}", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<byte[]> descargarResumen(@PathVariable Long compraId) {
         byte[] contenido = resumenCompraService.descargarResumen(compraId);
-
         String nombreArchivo = "resumen_compra_" + compraId + ".txt";
 
         return ResponseEntity.ok()
@@ -51,24 +49,21 @@ public class ResumenCompraController {
     }
 
     @PutMapping(path = "/{compraId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<String> actualizarResumen(@PathVariable Long compraId,
-                                                @RequestParam("file") MultipartFile nuevoArchivo) throws IOException {
+    public ResponseEntity<String> actualizarResumen(@PathVariable Long compraId,
+                                                    @RequestParam("file") MultipartFile nuevoArchivo) throws IOException {
 
-    // 1. Convertimos el archivo subido a String 
-    String nuevoContenido = new String(nuevoArchivo.getBytes(), StandardCharsets.UTF_8);
+        String nuevoContenido = new String(nuevoArchivo.getBytes(), StandardCharsets.UTF_8);
 
-    // 2. Llamamos al servicio con la firma: (Long, String)
-    resumenCompraService.actualizarResumen(compraId, nuevoContenido);
+        // Firma esperada: actualizarResumen(Long compraId, String nuevoContenido)
+        resumenCompraService.actualizarResumen(compraId, nuevoContenido);
 
-    String mensaje = "Resumen de compra actualizado correctamente para la compra ID: " + compraId;
-    return ResponseEntity.ok(mensaje);
-}
+        String mensaje = "Resumen de compra actualizado correctamente para la compra ID: " + compraId;
+        return ResponseEntity.ok(mensaje);
+    }
 
     @DeleteMapping("/{compraId}")
     public ResponseEntity<Void> borrarResumen(@PathVariable Long compraId) {
-
         resumenCompraService.borrarResumen(compraId);
         return ResponseEntity.noContent().build();
     }
 }
-
