@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/mq")
 public class MqController {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate; //para cola RabbitMQ
     private final ResumenCompraMqService resumenCompraMqService;
 
     public MqController(RabbitTemplate rabbitTemplate,
