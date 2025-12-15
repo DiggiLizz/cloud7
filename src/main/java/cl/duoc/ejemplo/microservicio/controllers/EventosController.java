@@ -1,118 +1,115 @@
 package cl.duoc.ejemplo.microservicio.controllers;
 
-import cl.duoc.ejemplo.microservicio.dto.ActualizarEventoRequest;
-import cl.duoc.ejemplo.microservicio.dto.CompraResponse;
-import cl.duoc.ejemplo.microservicio.dto.NuevaCompraRequest;
-import cl.duoc.ejemplo.microservicio.dto.NuevoEventoRequest;
-import cl.duoc.ejemplo.microservicio.model.Evento;
-import cl.duoc.ejemplo.microservicio.service.TiendaService;
-import jakarta.validation.Valid;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import cl.duoc.ejemplo.microservicio.dto.ResumenCompraRequest;
+import cl.duoc.ejemplo.microservicio.service.ResumenCompraService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+/* 🔹 OpenAPI imports */
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("/eventos")
-public class EventosController {
+@RequestMapping("/resumenes")
+@RequiredArgsConstructor
+public class ResumenCompraController {
 
-    private final TiendaService service;
+    private final ResumenCompraService resumenCompraService;
 
-    public EventosController(TiendaService service) {
-        this.service = service;
+    // ===============================
+    // POST /resumenes
+    // ===============================
+    @Operation(
+        summary = "Generar resumen de compra",
+        description = "Genera un resumen de compra, lo almacena en AWS S3 y registra sus metadatos en la base de datos"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Resumen generado correctamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> generarResumen(@RequestBody ResumenCompraRequest compra) {
+
+        resumenCompraService.generarYSubirResumen(compra);
+        String mensaje = "Resumen de compra generado y almacenado en S3 para la compra ID: " + compra.getCompraId();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(mensaje);
     }
 
-    // =========================
-    // GET /eventos  (HATEOAS)
-    // =========================
-    @GetMapping
-    public ResponseEntity<CollectionModel<EntityModel<Evento>>> listar() {
+    // ===============================
+    // GET /resumenes/{compraId}
+    // ===============================
+    @Operation(
+        summary = "Descargar resumen de compra",
+        description = "Descarga desde S3 el archivo de resumen asociado a una compra"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Resumen descargado correctamente"),
+        @ApiResponse(responseCode = "404", description = "Resumen no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping(value = "/{compraId}", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<byte[]> descargarResumen(@PathVariable Long compraId) {
 
-        List<EntityModel<Evento>> eventos = service.listarEventos().stream()
-                .map(evento -> EntityModel.of(evento,
-                        linkTo(methodOn(EventosController.class)
-                                .obtenerPorId(evento.getId())).withSelfRel()
-                ))
-                .toList();
+        byte[] contenido = resumenCompraService.descargarResumen(compraId);
+        String nombreArchivo = "resumen_compra_" + compraId + ".txt";
 
-        return ResponseEntity.ok(
-                CollectionModel.of(eventos,
-                        linkTo(methodOn(EventosController.class).listar()).withSelfRel()
-                )
-        );
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + nombreArchivo)
+                .contentType(MediaType.TEXT_PLAIN)
+                .body(contenido);
     }
 
-    // =========================
-    // GET /eventos/{id} (CLAVE PARA HATEOAS)
-    // =========================
-    @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Evento>> obtenerPorId(@PathVariable Long id) {
+    // ===============================
+    // PUT /resumenes/{compraId}
+    // ===============================
+    @Operation(
+        summary = "Actualizar resumen de compra",
+        description = "Sobrescribe el contenido del resumen de compra almacenado en AWS S3"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Resumen actualizado correctamente"),
+        @ApiResponse(responseCode = "404", description = "Resumen no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @PutMapping(path = "/{compraId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> actualizarResumen(
+            @PathVariable Long compraId,
+            @RequestParam("file") MultipartFile nuevoArchivo) throws IOException {
 
-        Evento evento = service.obtenerEventoPorId(id);
+        String nuevoContenido = new String(nuevoArchivo.getBytes(), StandardCharsets.UTF_8);
+        resumenCompraService.actualizarResumen(compraId, nuevoContenido);
 
-        EntityModel<Evento> model = EntityModel.of(evento,
-                linkTo(methodOn(EventosController.class).obtenerPorId(id)).withSelfRel(),
-                linkTo(methodOn(EventosController.class).listar()).withRel("eventos"),
-                linkTo(methodOn(EventosController.class).comprar(null)).withRel("comprar")
-        );
-
-        return ResponseEntity.ok(model);
+        String mensaje = "Resumen de compra actualizado correctamente para la compra ID: " + compraId;
+        return ResponseEntity.ok(mensaje);
     }
 
-    // =========================
-    // POST /eventos
-    // =========================
-    @PostMapping
-    public ResponseEntity<EntityModel<Evento>> crear(
-            @Valid @RequestBody NuevoEventoRequest dto) {
+    // ===============================
+    // DELETE /resumenes/{compraId}
+    // ===============================
+    @Operation(
+        summary = "Eliminar resumen de compra",
+        description = "Elimina el archivo de resumen desde S3 y su registro en la base de datos"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Resumen eliminado correctamente"),
+        @ApiResponse(responseCode = "404", description = "Resumen no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @DeleteMapping("/{compraId}")
+    public ResponseEntity<Void> borrarResumen(@PathVariable Long compraId) {
 
-        Evento evento = service.crearEvento(dto);
-
-        EntityModel<Evento> model = EntityModel.of(evento,
-                linkTo(methodOn(EventosController.class)
-                        .obtenerPorId(evento.getId())).withSelfRel()
-        );
-
-        return ResponseEntity.ok(model);
-    }
-
-    // =========================
-    // PUT /eventos/{id}
-    // =========================
-    @PutMapping("/{id}")
-    public ResponseEntity<EntityModel<Evento>> actualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody ActualizarEventoRequest dto) {
-
-        Evento evento = service.actualizarEvento(id, dto);
-
-        EntityModel<Evento> model = EntityModel.of(evento,
-                linkTo(methodOn(EventosController.class)
-                        .obtenerPorId(id)).withSelfRel()
-        );
-
-        return ResponseEntity.ok(model);
-    }
-
-    // =========================
-    // DELETE /eventos/{id}
-    // =========================
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        service.eliminarEvento(id);
+        resumenCompraService.borrarResumen(compraId);
         return ResponseEntity.noContent().build();
-    }
-
-    // =========================
-    // POST /eventos/compras
-    // =========================
-    @PostMapping("/compras")
-    public ResponseEntity<CompraResponse> comprar(
-            @Valid @RequestBody NuevaCompraRequest dto) {
-        return ResponseEntity.ok(service.comprar(dto));
     }
 }
