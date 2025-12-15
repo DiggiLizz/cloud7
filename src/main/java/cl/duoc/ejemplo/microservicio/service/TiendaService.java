@@ -36,6 +36,12 @@ public class TiendaService {
         return eventoRepo.save(e);
     }
 
+    public Evento obtenerEventoPorId(Long id) {
+        return eventoRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("No existe evento con id " + id));
+    }
+
+
     @Transactional
     public Evento actualizarEvento(Long id, ActualizarEventoRequest dto) {
         Evento e = eventoRepo.findById(id)
