@@ -36,7 +36,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://cloudramo.b2clogin.com/9ccce496-e4fd-4f14-89ff-3b4f76e558a5/v2.0/
+          issuer-uri: https://cloudramo.b2clogin.com/cloudramo.onmicrosoft.com/B2C_1_cloudFlujo/v2.0
 
 # Tu bucket (propiedad propia de la app)
 app:
