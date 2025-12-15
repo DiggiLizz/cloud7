@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-
-    <!-- Herencia de Spring Boot -->
+    <!-- ========================= -->
+    <!-- PARENT SPRING BOOT        -->
+    <!-- ========================= -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,14 +16,19 @@
         <relativePath/>
     </parent>
 
-    <!-- Identificación del proyecto -->
+    <!-- ========================= -->
+    <!-- IDENTIDAD DEL PROYECTO    -->
+    <!-- ========================= -->
     <groupId>com.duoc.ejemplo</groupId>
     <artifactId>microservicio</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>microservicio</name>
     <description>Microservicio ejemplo (eventos/ventas con AWS S3)</description>
 
-    <!-- PROPIEDADES -->
+    <!-- ========================= -->
+    <!-- PROPIEDADES               -->
+    <!-- ========================= -->
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -29,7 +36,9 @@
         <spring-cloud-aws.version>3.2.0</spring-cloud-aws.version>
     </properties>
 
-    <!-- BOM de Spring Cloud AWS (maneja versiones automáticamente) -->
+    <!-- ========================= -->
+    <!-- DEPENDENCY MANAGEMENT     -->
+    <!-- ========================= -->
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -42,7 +51,9 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- DEPENDENCIAS -->
+    <!-- ========================= -->
+    <!-- DEPENDENCIAS              -->
+    <!-- ========================= -->
     <dependencies>
 
         <!-- Web -->
@@ -51,62 +62,34 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Mensajería con RabbitMQ -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
-        <!-- Seguridad básica -->
+        <!-- Seguridad -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Resource Server OAuth2 (JWT / Azure AD B2C) -->
+        <!-- OAuth2 Resource Server -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
-        <!-- Validaciones (Bean Validation) -->
+        <!-- Validaciones -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- JPA / Hibernate -->
+        <!-- Mensajería -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-amqp</artifactId>
+        </dependency>
+
+        <!-- Persistencia -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <!-- Base de datos H2 (modo desarrollo) -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Driver Oracle (si conectas a Oracle Cloud más adelante) -->
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc11</artifactId>
-            <version>23.5.0.24.07</version>
-        </dependency>
-
-        <!-- AWS S3 (sin versión, usa el BOM de Spring Cloud AWS) -->
-        <dependency>
-            <groupId>io.awspring.cloud</groupId>
-            <artifactId>spring-cloud-aws-starter-s3</artifactId>
-        </dependency>
-
-        <!-- Lombok (para @Getter, @Setter, @RequiredArgsConstructor, etc.) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.34</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- HATEOAS -->
@@ -115,11 +98,38 @@
             <artifactId>spring-boot-starter-hateoas</artifactId>
         </dependency>
 
-        <!-- OpenAPI / Swagger UI -->
+        <!-- OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
+        </dependency>
+
+        <!-- Base de datos -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>23.5.0.24.07</version>
+        </dependency>
+
+        <!-- AWS -->
+        <dependency>
+            <groupId>io.awspring.cloud</groupId>
+            <artifactId>spring-cloud-aws-starter-s3</artifactId>
+        </dependency>
+
+        <!-- Utilitarios -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.34</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test -->
@@ -131,8 +141,11 @@
 
     </dependencies>
 
-    <!-- CONFIGURACIÓN DE BUILD -->
+    <!-- ========================= -->
+    <!-- BUILD                     -->
+    <!-- ========================= -->
     <build>
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -142,13 +155,11 @@
 
         <plugins>
 
-            <!-- Plugin principal de Spring Boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- Asegura codificación UTF-8 y evita filtrar binarios -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -166,6 +177,7 @@
             </plugin>
 
         </plugins>
+
     </build>
 
 </project>
