@@ -76,7 +76,7 @@ public class S3Controller {
         }
     }
 
-    /** Mover objeto dentro del bucket */
+    //Mover objeto dentro del bucket
     @PostMapping("/{bucket}/move")
     public ResponseEntity<Void> moveObject(@PathVariable String bucket,
                                             @RequestParam String sourceKey,
@@ -85,7 +85,7 @@ public class S3Controller {
         return ResponseEntity.ok().build();
     }
 
-    /** Eliminar objeto */
+    //Eliminar objeto
     @DeleteMapping("/{bucket}/object")
     public ResponseEntity<Void> deleteObject(@PathVariable String bucket,
                                             @RequestParam String key) {
