@@ -41,7 +41,7 @@ spring:
 # Tu bucket (propiedad propia de la app)
 app:
   s3:
-    bucket: cloudsem2
+    bucket: sum8cloud
 
 # para activar el efs
 efs:

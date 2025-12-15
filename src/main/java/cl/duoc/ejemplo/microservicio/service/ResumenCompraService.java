@@ -26,12 +26,12 @@ import java.time.LocalDateTime;
 @Service
 public class ResumenCompraService {
 
-    private final S3Client s3Client;
-    private final ResumenCompraRepository resumenRepo;
-    private final RabbitTemplate rabbitTemplate;
+        private final S3Client s3Client;
+        private final ResumenCompraRepository resumenRepo;
+        private final RabbitTemplate rabbitTemplate;
 
-    @Value("${app.s3.bucket}")
-    private String bucketName;
+        @Value("${app.s3.bucket}")
+        private String bucketName;
 
     public ResumenCompraService(S3Client s3Client,
         ResumenCompraRepository resumenRepo,
