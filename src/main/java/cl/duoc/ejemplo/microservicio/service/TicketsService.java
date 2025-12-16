@@ -1,8 +1,10 @@
 package cl.duoc.ejemplo.microservicio.service;
 
-import org.springframework.stereotype.Service;
-import cl.duoc.ejemplo.microservicio.model.Tickets;
+import cl.duoc.ejemplo.microservicio.config.RabbitConfig;
 import cl.duoc.ejemplo.microservicio.dto.EstadisticasTicketsDto;
+import cl.duoc.ejemplo.microservicio.model.Tickets;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +21,12 @@ public class TicketsService {
     private final Map<Long, Tickets> storage = new ConcurrentHashMap<>();
     private final AtomicLong sequence = new AtomicLong(1L);
 
+    private final RabbitTemplate rabbitTemplate;
+
+    public TicketsService(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
     public Tickets crearTicket(Tickets ticket) {
         Long id = sequence.getAndIncrement();
         ticket.setId(id);
@@ -31,6 +39,21 @@ public class TicketsService {
         }
 
         storage.put(id, ticket);
+
+        // ✅ PUBLICAR A RABBITMQ (OK / ERROR)
+        // - OK: precio > 0
+        // - ERROR: precio null o <= 0
+        try {
+            if (ticket.getPrecio() != null && ticket.getPrecio().signum() > 0) {
+                rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_OK, ticket);
+            } else {
+                rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_ERROR, ticket);
+            }
+        } catch (Exception ex) {
+            // Si Rabbit está caído o falla la publicación, lo mandamos a la cola de error como respaldo
+            rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_ERROR, ticket);
+        }
+
         return ticket;
     }
 
