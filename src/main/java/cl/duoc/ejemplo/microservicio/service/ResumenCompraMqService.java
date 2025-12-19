@@ -16,26 +16,29 @@ public class ResumenCompraMqService {
     private final RabbitTemplate rabbitTemplate;
 
     public ResumenCompraMqService(ResumenCompraRepository resumenRepo,
-                                RabbitTemplate rabbitTemplate) {
+                                    RabbitTemplate rabbitTemplate) {
         this.resumenRepo = resumenRepo;
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    /**
-     * Procesa un mensaje de la cola "OK":
-     *  - Guarda/actualiza el resumen en la tabla RESUMEN_COMPRA.
-     *  - Si hay error, reenvía el mensaje a la cola de errores.
-     */
+    // Procesa un mensaje de la cola "OK":
+    // - Guarda/actualiza el resumen en la tabla RESUMEN_COMPRA.
+    // - Si hay error, reenvía el mensaje a la cola de errores.
     public void procesarMensaje(ResumenCompraMessage message) {
         try {
             ResumenCompra resumen = resumenRepo.findByNumeroResumen(message.getNumeroResumen())
                     .orElseGet(ResumenCompra::new);
 
             resumen.setNumeroResumen(message.getNumeroResumen());
-            resumen.setNombreArchivo("resumen_compra_" + message.getNumeroResumen() + ".txt");
-            resumen.setCarpetaResumen(String.valueOf(message.getNumeroResumen()));
+            resumen.setNombreArchivo(message.getNombreArchivo());
+            resumen.setCarpetaResumen(message.getCarpetaResumen());
             resumen.setS3Key(message.getS3Key());
-            resumen.setFechaRegistro(LocalDateTime.now());
+
+            if (message.getFechaRegistro() != null) {
+                resumen.setFechaRegistro(message.getFechaRegistro());
+            } else {
+                resumen.setFechaRegistro(LocalDateTime.now());
+            }
 
             resumenRepo.save(resumen);
 

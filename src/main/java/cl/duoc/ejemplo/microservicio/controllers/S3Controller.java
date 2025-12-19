@@ -17,13 +17,13 @@ public class S3Controller {
 
     private final AwsS3Service awsS3Service;
 
-    /** ✅ Listar objetos en un bucket (retorna solo keys como String) */
+    /** Listar objetos en un bucket (retorna solo keys como String) */
     @GetMapping("/{bucket}/objects")
     public ResponseEntity<List<String>> listObjects(@PathVariable String bucket) {
         return ResponseEntity.ok(awsS3Service.listObjects(bucket));
     }
 
-    /** ✅ Descargar archivo como byte[] */
+    /** Descargar archivo como byte[] */
     @GetMapping("/{bucket}/object")
     public ResponseEntity<byte[]> downloadObject(@PathVariable String bucket,
                                                     @RequestParam String key) {
@@ -36,7 +36,7 @@ public class S3Controller {
                 .body(fileBytes);
     }
 
-    /** ✅ Subir archivo (S3 directo) */
+    /** Subir archivo (S3 directo) */
     @PostMapping(path = "/{bucket}/object", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadObject(@PathVariable String bucket,
                                                 @RequestParam("file") MultipartFile file,
@@ -55,7 +55,7 @@ public class S3Controller {
         }
     }
 
-    /** ✅ Mover objeto dentro del bucket */
+    /**Mover objeto dentro del bucket */
     @PostMapping("/{bucket}/move")
     public ResponseEntity<Void> moveObject(@PathVariable String bucket,
                                             @RequestParam String sourceKey,
@@ -64,7 +64,7 @@ public class S3Controller {
         return ResponseEntity.ok().build();
     }
 
-    /** ✅ Eliminar objeto */
+    /** Eliminar objeto */
     @DeleteMapping("/{bucket}/object")
     public ResponseEntity<Void> deleteObject(@PathVariable String bucket,
                                                 @RequestParam String key) {

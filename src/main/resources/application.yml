@@ -9,7 +9,7 @@ spring:
     password:
 
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: guest
     password: guest
@@ -38,7 +38,7 @@ spring:
         jwt:
           issuer-uri: "https://login.microsoftonline.com/9ccce496-e4fd-4f14-89ff-3b4f76e558a5/v2.0" 
 
-# Tu bucket (propiedad propia de la app)
+# bucket
 app:
   s3:
     bucket: sum8cloud

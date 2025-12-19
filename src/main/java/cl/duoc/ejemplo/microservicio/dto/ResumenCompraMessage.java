@@ -7,8 +7,8 @@ public class ResumenCompraMessage implements Serializable {
 
     private Long numeroResumen;      // ID de la compra (TicketCompra.id)
     private String nombreArchivo;    // Ej: compra_15.txt
-    private String carpetaResumen;   // Ej: compras/15
-    private String s3Key;            // Ej: compras/15/compra_15.txt
+    private String carpetaResumen;   // Ej: comprobantes
+    private String s3Key;            // Ej: compras/compobantes
     private LocalDateTime fechaRegistro;
 
     public ResumenCompraMessage() {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/mq")
 public class MqController {
 
-    private final RabbitTemplate rabbitTemplate; //para cola RabbitMQ
+    private final RabbitTemplate rabbitTemplate;
     private final ResumenCompraMqService resumenCompraMqService;
 
     public MqController(RabbitTemplate rabbitTemplate,
@@ -20,10 +20,6 @@ public class MqController {
         this.resumenCompraMqService = resumenCompraMqService;
     }
 
-    /**
-     * Endpoint que consume todos los mensajes pendientes en la cola "cola-tickets-ok"
-     * y los guarda en la base de datos usando ResumenCompraMqService.
-     */
     @PostMapping("/procesar-resumenes")
     public ResponseEntity<String> procesarResumenesPendientes() {
 
@@ -32,17 +28,18 @@ public class MqController {
         while (true) {
             Object message = rabbitTemplate.receiveAndConvert(RabbitConfig.COLA_TICKETS_OK);
             if (message == null) {
-                break; // no quedan mensajes en la cola
+                break;
             }
 
             if (message instanceof ResumenCompraMessage resumenMessage) {
                 resumenCompraMqService.procesarMensaje(resumenMessage);
                 procesados++;
+            } else {
+                rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_ERROR, message);
             }
         }
 
-        String respuesta = "Se procesaron " + procesados + " mensajes desde la cola '"
-                + RabbitConfig.COLA_TICKETS_OK + "'.";
+        String respuesta = "Se procesaron " + procesados + " mensajes desde la cola '" + RabbitConfig.COLA_TICKETS_OK + "'.";
         return ResponseEntity.ok(respuesta);
     }
 }
