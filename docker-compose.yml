@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   rabbitmq:
@@ -15,6 +14,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   my-app:
     image: tsuki19/my-app:latest
@@ -26,14 +26,22 @@ services:
       - "8080:8080"
     volumes:
       - /mnt/efs:/app/efs
+
+    # Asegura carga de variables desde archivo .env
+    env_file:
+      - .env
+
     environment:
+      # RabbitMQ (se sobreescribe con .env si existe)
       SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_PORT: "5672"
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER:-admin}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASS:-admin}
 
-      # Si usa AWS (S3/EFS u otros SDK), déjelo así (se inyecta desde el entorno)
+      # AWS (si usa STS, AWS_SESSION_TOKEN es obligatorio)
       AWS_REGION: ${AWS_REGION:-us-east-1}
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-}
+
+    restart: unless-stopped
