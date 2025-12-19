@@ -22,7 +22,6 @@ services:
     volumes:
       - /mnt/efs:/app/efs
     environment:
-      # 🔹 SOLO lo que cambia respecto a application.yml
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_USERNAME: admin
       SPRING_RABBITMQ_PASSWORD: admin
