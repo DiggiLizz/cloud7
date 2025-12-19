@@ -16,8 +16,6 @@ public class SecurityConfig {
                 http
                         .csrf(csrf -> csrf.disable())
                         .authorizeHttpRequests(auth -> auth
-                                // Aquí puedes ir afinando permisos por endpoint más adelante
-                                // .requestMatchers("/public/**").permitAll()
                                 .anyRequest().authenticated()
                         )
                         .oauth2ResourceServer(oauth2 -> oauth2

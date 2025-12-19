@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface ResumenCompraRepository extends JpaRepository<ResumenCompra, Long> {
 
-    //Busca el resumen asociado a un número de resumen concreto.
     Optional<ResumenCompra> findByNumeroResumen(Long numeroResumen);
+
 }
