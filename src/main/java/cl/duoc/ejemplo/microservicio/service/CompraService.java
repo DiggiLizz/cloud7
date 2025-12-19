@@ -96,11 +96,16 @@ public class CompraService {
                         LocalDateTime.now()
                 );
 
+                // ✅ Bloque corregido: Rabbit OK -> si falla intenta ERROR -> si falla, no revienta la compra
                 try {
                 rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_OK, msg);
                 } catch (Exception ex) {
-                // Si falla RabbitMQ, enviamos a cola de error para trazabilidad
-                rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_ERROR, msg);
+                try {
+                        rabbitTemplate.convertAndSend(RabbitConfig.COLA_TICKETS_ERROR, msg);
+                } catch (Exception ignored) {
+                        System.err.println("RabbitMQ no disponible. CompraId=" + compra.getId()
+                                + " (no se pudo enviar OK ni ERROR).");
+                }
                 }
 
                 return new CompraResponse(
