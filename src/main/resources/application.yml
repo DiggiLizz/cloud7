@@ -41,7 +41,7 @@ spring:
 # bucket
 app:
   s3:
-    bucket: sum8cloud
+    bucket: sum8cloud2
 
 # para activar el efs
 efs:
