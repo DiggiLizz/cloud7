@@ -28,13 +28,30 @@ public class Evento {
         this.precio = precio;
     }
 
-    public Long getId() { return id; }
-    public String getNombre() { return nombre; }
-    public LocalDate getFecha() { return fecha; }
-    public BigDecimal getPrecio() { return precio; }
+    //getters y setters
+    public Long getId() {
+        return id;
+    }
+    public String getNombre() {
+        return nombre;
+    }
+    public LocalDate getFecha() {
+        return fecha;
+    }
+    public BigDecimal getPrecio() {
+        return precio;
+    }
 
-    public void setId(Long id) { this.id = id; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
-    public void setPrecio(BigDecimal precio) { this.precio = precio; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio;
+    }
 }
