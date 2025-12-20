@@ -34,7 +34,7 @@ public class TicketS3Controller {
     // ACTUALIZAR (REEMPLAZA)
     @PutMapping(path = "/archivo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> actualizar(@RequestParam String key,
-                                            @RequestParam("file") MultipartFile file) {
+                                                @RequestParam("file") MultipartFile file) {
         try {
             awsS3Service.upload(bucket, key, file);
             return ResponseEntity.ok("Ticket actualizado. key=" + key);
