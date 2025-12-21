@@ -24,6 +24,8 @@ services:
       - "8080:8080"
     volumes:
       - /mnt/efs:/app/efs
+    env_file:
+      - .env
     environment:
       # Rabbit
       SPRING_RABBITMQ_HOST: rabbitmq
