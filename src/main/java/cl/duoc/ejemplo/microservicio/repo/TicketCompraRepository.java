@@ -13,7 +13,7 @@ public interface TicketCompraRepository extends JpaRepository<TicketCompra, Long
             COALESCE(SUM(tc.total), 0),
             COUNT(tc)
         FROM TicketCompra tc
-        WHERE tc.evento.id = :eventoId
+        WHERE tc.eventoId = :eventoId
     """)
     Object[] obtenerResumenPorEvento(@Param("eventoId") Long eventoId);
 }
